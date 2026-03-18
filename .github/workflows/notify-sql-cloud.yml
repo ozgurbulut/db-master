@@ -15,7 +15,7 @@ jobs:
       - name: Get Merged SQL Files
         id: files
         run: |
-          # Sadece .sql dosyalarını bulur
+          # Değişen dosyalar arasından sadece .sql olanları filtreler
           SQL_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.sql$' | xargs)
           echo "found_files=$SQL_FILES" >> $GITHUB_OUTPUT
 
@@ -25,7 +25,14 @@ jobs:
           # Commit mesajından JIRA ID çek (Örn: SCRUM-13)
           ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1)
           
-          # SENİN NGROK ADRESİN BURADA:
+          # JIRA ID bulunamazsa varsayılan bir değer atayalım (Opsiyonel)
+          if [ -z "$ISSUE_KEY" ]; then
+            ISSUE_KEY="N/A"
+          fi
+
+          echo "Gönderilen Veri: IssueKey=$ISSUE_KEY, Files=${{ steps.files.outputs.found_files }}"
+
+          # ngrok adresi ve doğru Controller yolu (GitHubWebhook)
           curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
           -H "Content-Type: application/json" \
-          -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"${{ steps.files.outputs.found_files }}\"}"
+          -d "{\"IssueKey\": \"$ISSUE_KEY\", \"Files\": \"${{ steps.files.outputs.found_files }}\"}"
