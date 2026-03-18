@@ -2,7 +2,7 @@ name: Notify SQL Cloud on Merge
 on:
   push:
     branches:
-      - main # Sadece ana dala merge/push olduğunda çalışır
+      - main
 
 jobs:
   notify:
@@ -12,17 +12,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Değişen SQL Dosyalarını Bul
+      - name: Get Merged SQL Files
         id: files
         run: |
-          # Son merge ile gelen .sql dosyalarını bulur
+          # Sadece .sql dosyalarını bulur
           SQL_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.sql$' | xargs)
           echo "found_files=$SQL_FILES" >> $GITHUB_OUTPUT
 
-      - name: SQL Cloud'a Bildir
+      - name: Notify Local API
         if: steps.files.outputs.found_files != ''
         run: |
-          # Burada senin lokaldeki veya sunucudaki API'ne haber veriyoruz
-          # Örnek: SCRUM bilet numarasını branch isminden veya commit'ten çekebiliriz
-          curl -X POST "https://senin-api-adresin.com/update-change-set" \
-          -d "files=${{ steps.files.outputs.found_files }}"
+          # Commit mesajından JIRA ID çek (Örn: SCRUM-13)
+          ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1)
+          
+          # SENİN NGROK ADRESİN BURADA:
+          curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
+          -H "Content-Type: application/json" \
+          -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"${{ steps.files.outputs.found_files }}\"}"
