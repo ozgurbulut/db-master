@@ -1,0 +1,6 @@
+CREATE TABLE ApplicationLogs (
+    LogId INT PRIMARY KEY IDENTITY(1,1),
+    LogMessage NVARCHAR(MAX),
+    LogDate DATETIME DEFAULT GETDATE(),
+    LogStatus NVARCHAR(50)
+);
