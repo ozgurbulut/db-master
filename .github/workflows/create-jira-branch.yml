@@ -6,21 +6,32 @@ on:
 jobs:
   create_branch:
     runs-on: ubuntu-latest
+    # Actions'ın depoya yazma yetkisi alması için bu blok kritik
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Create and Push Branch
         run: |
-          # Jira'dan gelen verileri değişkenlere al
+          # Git kimlik bilgilerini tanımla (Hata almamak için şart)
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          
+          # Jira'dan gelen verileri al
           ISSUE_KEY="${{ github.event.client_payload.issue_key }}"
           SUMMARY="${{ github.event.client_payload.summary }}"
           
-          # Branch ismini temizle (Türkçe karakter, boşluk ve özel karakterleri düzelt)
+          # Branch ismini temizle ve oluştur
           CLEAN_SUMMARY=$(echo "$SUMMARY" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--/-/g' | cut -c1-30)
           BRANCH_NAME="feature/${ISSUE_KEY}-${CLEAN_SUMMARY}"
           
-          echo "Olusturulacak branch: $BRANCH_NAME"
+          echo "Olusturulacak dal: $BRANCH_NAME"
           
+          # Branch oluştur ve GitHub'a gönder
           git checkout -b "$BRANCH_NAME"
           git push origin "$BRANCH_NAME"
