@@ -1,0 +1,4 @@
+-- Mevcut bir tabloya, doğru kolonlarla veri ekleme
+INSERT INTO JiraTasks (JiraId, Summary, CreatedDate)
+VALUES ('DML-101', 'Başarılı bir insert testi', GETDATE());
+GO

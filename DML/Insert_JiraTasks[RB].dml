@@ -1,0 +1,2 @@
+DELETE FROM JiraTasks WHERE JiraId = 'DML-101';
+GO

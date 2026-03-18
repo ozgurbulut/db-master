@@ -1,0 +1,5 @@
+CREATE OR ALTER TRIGGER TRG_LogTaskChange ON JiraTasks AFTER UPDATE AS
+BEGIN
+    PRINT 'Log updated';
+END
+GO

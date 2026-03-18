@@ -1,0 +1,4 @@
+-- Olmayan bir kolona veri eklemeye çalışmak
+INSERT INTO JiraTasks (JiraId, OlmayanKolon)
+VALUES ('DML-102', 'Bu işlem hata verecek');
+GO
