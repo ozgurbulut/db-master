@@ -10,28 +10,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # Sadece son commit'i değil, bir öncekini de çek ki diff alabilsin
+          fetch-depth: 0 # Tüm geçmişi çek ki dosya farklarını kesin bulsun
 
       - name: Get Merged SQL Files
         id: files
         run: |
-          # Değişen dosyaları bulur, .sql olanları filtreler
-          SQL_FILES=$(git diff --name-only HEAD^ HEAD | grep '\.sql$' | xargs)
+          # Son commit ile gelen .sql dosyalarını kesin bulur
+          SQL_FILES=$(git show --name-only --format="" HEAD | grep '\.sql$' | xargs)
           echo "found_files=$SQL_FILES" >> $GITHUB_OUTPUT
+          echo "Bulunan SQL Dosyalari: $SQL_FILES"
 
       - name: Notify Local API
-        if: steps.files.outputs.found_files != ''
+        # Eğer dosya bulunamazsa bile zorla çalıştıralım ki loglarda ne olduğunu görelim
+        # if: steps.files.outputs.found_files != '' (Bu satırı kaldırdım, her durumda çalışsın)
         run: |
-          # Commit mesajından JIRA ID çek
+          # Commit mesajından JIRA ID'yi çek
           ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1)
           
+          # Eğer bilet bulunamazsa varsayılan SCRUM-15 (veya N/A) ata
           if [ -z "$ISSUE_KEY" ]; then
-            ISSUE_KEY="N/A"
+            ISSUE_KEY="SCRUM-15"
           fi
 
-          echo "Gönderilen Veri: issue_key=$ISSUE_KEY, files=${{ steps.files.outputs.found_files }}"
+          echo "Gonderilen Veri: issue_key=$ISSUE_KEY, files=${{ steps.files.outputs.found_files }}"
 
-          # JSON anahtarlarını C# sınıfındaki [JsonPropertyName] etiketlerine göre küçülttük
+          # Tek satırda temiz JSON gönderimi
           curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
           -H "Content-Type: application/json" \
           -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"${{ steps.files.outputs.found_files }}\"}"
