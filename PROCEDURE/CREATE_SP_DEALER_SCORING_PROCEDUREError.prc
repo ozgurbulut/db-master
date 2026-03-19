@@ -1,5 +1,0 @@
-CREATE OR ALTER PROCEDURE SP_InsertTestData 
-AS 
-BEGIN 
-    INSERT INTO OlmayanTablo (Sutun1) VALUES ('Test');
-END
