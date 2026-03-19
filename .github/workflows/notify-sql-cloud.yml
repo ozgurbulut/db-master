@@ -9,35 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 
 
-      - name: Get Merged SQL and PRC Files
-        id: files
+      - name: Send Signal to Backend
         run: |
-          # Hem .sql hem de .prc dosyalarını yakalar (Büyük/küçük harf duyarsız)
-          # git diff-tree merge commit'lerindeki dosyaları bulmakta daha başarılıdır
-          FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '\.(sql|prc)$' | xargs || echo "")
-          
-          echo "found_files=$FILES" >> $GITHUB_OUTPUT
-          echo "Bulunan Dosyalar: $FILES"
+          COMMIT_SHA="${{ github.sha }}"
+          USER_NAME="${{ github.actor }}"
+          # Mesajdan JIRA ID çek, yoksa varsayılan ata
+          ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1 || echo "SCRUM-15")
 
-      - name: Notify Local API
-        run: |
-          # Commit mesajından JIRA ID çek
-          ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1)
-          
-          # Eğer bilet bulunamazsa varsayılan atama
-          if [ -z "$ISSUE_KEY" ]; then
-            ISSUE_KEY="SCRUM-15"
-          fi
-
-          # Değişkeni adım çıktı değerinden al
-          FILES_LIST="${{ steps.files.outputs.found_files }}"
-          
-          echo "Gonderilecek Veri: issue_key=$ISSUE_KEY, files=$FILES_LIST"
-
-          # ngrok üzerinden backend'e gönderim
           curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
           -H "Content-Type: application/json" \
-          -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"$FILES_LIST\"}"
+          -d "{\"issue_key\": \"$ISSUE_KEY\", \"commit_sha\": \"$COMMIT_SHA\", \"user_name\": \"$USER_NAME\"}"
