@@ -12,29 +12,32 @@ jobs:
         with:
           fetch-depth: 0 
 
-      - name: Get Merged SQL Files
+      - name: Get Merged SQL and PRC Files
         id: files
         run: |
-          # .sql dosyalarını bul ve listele
-          SQL_FILES=$(git show --name-only --format="" HEAD | grep '\.sql$' | xargs)
-          echo "found_files=$SQL_FILES" >> $GITHUB_OUTPUT
-          echo "Bulunan SQL Dosyalari: $SQL_FILES"
+          # Hem .sql hem de .prc dosyalarını yakalar (Büyük/küçük harf duyarsız)
+          # git diff-tree merge commit'lerindeki dosyaları bulmakta daha başarılıdır
+          FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '\.(sql|prc)$' | xargs || echo "")
+          
+          echo "found_files=$FILES" >> $GITHUB_OUTPUT
+          echo "Bulunan Dosyalar: $FILES"
 
       - name: Notify Local API
         run: |
-          # JIRA ID çek
+          # Commit mesajından JIRA ID çek
           ISSUE_KEY=$(git log -1 --pretty=%B | grep -oE '[A-Z]+-[0-9]+' | head -1)
           
+          # Eğer bilet bulunamazsa varsayılan atama
           if [ -z "$ISSUE_KEY" ]; then
             ISSUE_KEY="SCRUM-15"
           fi
 
-          # Değişkenleri güvenli formatta hazırla
-          FILES="${{ steps.files.outputs.found_files }}"
+          # Değişkeni adım çıktı değerinden al
+          FILES_LIST="${{ steps.files.outputs.found_files }}"
           
-          echo "Gonderilecek Veri: issue_key=$ISSUE_KEY, files=$FILES"
+          echo "Gonderilecek Veri: issue_key=$ISSUE_KEY, files=$FILES_LIST"
 
-          # 400 hatasını önlemek için en güvenli JSON gönderim formatı
+          # ngrok üzerinden backend'e gönderim
           curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
           -H "Content-Type: application/json" \
-          -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"$FILES\"}"
+          -d "{\"issue_key\": \"$ISSUE_KEY\", \"files\": \"$FILES_LIST\"}"
