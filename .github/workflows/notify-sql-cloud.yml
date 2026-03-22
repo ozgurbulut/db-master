@@ -19,4 +19,8 @@ jobs:
 
           curl -X POST "https://unmindful-vanna-untrig.ngrok-free.dev/api/GitHubWebhook/merge-notification" \
           -H "Content-Type: application/json" \
-          -d "{\"issue_key\": \"$ISSUE_KEY\", \"commit_sha\": \"$COMMIT_SHA\", \"user_name\": \"$USER_NAME\"}"
+          -d "{
+            \"IssueKey\": \"$ISSUE_KEY\",
+            \"CommitSha\": \"$COMMIT_SHA\",
+            \"UserName\": \"$USER_NAME\"
+          }"
