@@ -1,0 +1,5 @@
+-- Category: DML
+INSERT INTO SYS_CONFIG (ParamName, ParamValue, UpdatedBy)
+VALUES ('MAX_RETRY_COUNT', '5', 'SystemAdmin'),
+       ('MAINTENANCE_MODE', 'FALSE', 'SystemAdmin'),
+       ('API_TIMEOUT_SEC', '30', 'SystemAdmin');
