@@ -1,0 +1,6 @@
+-- Category: DML
+INSERT INTO SQLCLOUD_LOG_AUDIT (JiraKey, ActionUser, Detail, Status)
+VALUES ('SCRUM-29', 'Ozgur Bulut', 'Initial audit record for testing system flow', 'SUCCESS');
+
+INSERT INTO SQLCLOUD_LOG_AUDIT (JiraKey, ActionUser, Detail, Status)
+VALUES ('SCRUM-30', 'Ozgur Bulut', 'New ChangeSet item type verification', 'PENDING');
