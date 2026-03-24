@@ -1,0 +1,1 @@
+DELETE FROM CUSTOMER_LIMITS WHERE CUSTOMER_NAME IN ('Özgür Bulut', 'Koray Demir', 'Cagil Kaynak');

@@ -1,0 +1,4 @@
+INSERT INTO CUSTOMER_LIMITS (CUSTOMER_NAME, TOTAL_LIMIT, USED_LIMIT)
+VALUES ('Özgür Bulut', 50000.00, 12500.00),
+       ('Koray Demir', 75000.00, 45000.00),
+       ('Cagil Kaynak', 100000.00, 0.00);
