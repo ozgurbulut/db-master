@@ -1,0 +1,10 @@
+
+-- Category: DDL
+CREATE TABLE SQLCLOUD_LOG_AUDIT (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    JiraKey VARCHAR(50),
+    ActionDate DATETIME DEFAULT GETDATE(),
+    ActionUser VARCHAR(100),
+    Detail NVARCHAR(MAX),
+    Status VARCHAR(20)
+);
